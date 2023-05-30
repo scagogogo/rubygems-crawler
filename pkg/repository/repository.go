@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/crawler-go-go-go/go-requests"
-	"github.com/scagogogo/rubygems-crawler/pkg/model"
+	"github.com/scagogogo/rubygems-crawler/pkg/models"
 )
 
 // https://guides.rubygems.org/api/v2/rubygems/[GEM%20NAME]/versions/[VERSION%20NUMBER].(json%7Cyaml)
