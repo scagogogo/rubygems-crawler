@@ -1,4 +1,4 @@
-package model
+package models
 
 type Metadata struct {
 	DocumentationURI    string `json:"documentation_uri"`

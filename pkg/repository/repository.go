@@ -26,33 +26,33 @@ func NewRepository(options ...*Options) *Repository {
 
 // GetPackage 获取gem包的基础信息
 // GetPackage GET - /api/v1/gems/[GEM NAME].(json|yaml)
-func (x *Repository) GetPackage(ctx context.Context, gemName string) (*model.PackageInformation, error) {
+func (x *Repository) GetPackage(ctx context.Context, gemName string) (*models.PackageInformation, error) {
 	targetUrl := fmt.Sprintf("%s/api/v1/gems/%s.json", x.options.ServerURL, gemName)
-	return getJson[*model.PackageInformation](ctx, x, targetUrl)
+	return getJson[*models.PackageInformation](ctx, x, targetUrl)
 }
 
 // Search 在整个仓库中搜索符合条件的包，使用page参数翻页，如果响应列表为空则说明翻到了尾页
 // GET - /api/v1/search.(json|yaml)?query=[YOUR QUERY]
-func (x *Repository) Search(ctx context.Context, query string, page int) ([]*model.PackageInformation, error) {
+func (x *Repository) Search(ctx context.Context, query string, page int) ([]*models.PackageInformation, error) {
 	if page <= 0 {
 		page = 1
 	}
 	targetUrl := fmt.Sprintf("%s/api/v1/search.json?query=%s&page=%d", x.options.ServerURL, query, page)
-	return getJson[[]*model.PackageInformation](ctx, x, targetUrl)
+	return getJson[[]*models.PackageInformation](ctx, x, targetUrl)
 }
 
 // GetGemVersions 获取指定的gem包的所有版本都有哪些
 // GET - /api/v1/versions/[GEM NAME].(json|yaml)
-func (x *Repository) GetGemVersions(ctx context.Context, gemName string) ([]*model.Version, error) {
+func (x *Repository) GetGemVersions(ctx context.Context, gemName string) ([]*models.Version, error) {
 	targetUrl := fmt.Sprintf("%s/api/v1/versions/%s.json", x.options.ServerURL, gemName)
-	return getJson[[]*model.Version](ctx, x, targetUrl)
+	return getJson[[]*models.Version](ctx, x, targetUrl)
 }
 
 // GetGemLatestVersion 获取给定包的最新版本
 // GET - /api/v1/versions/[GEM NAME]/latest.json
-func (x *Repository) GetGemLatestVersion(ctx context.Context, gemName string) (*model.LatestVersion, error) {
+func (x *Repository) GetGemLatestVersion(ctx context.Context, gemName string) (*models.LatestVersion, error) {
 	targetUrl := fmt.Sprintf("%s/api/v1/versions/%s/latest.json", x.options.ServerURL, gemName)
-	return getJson[*model.LatestVersion](ctx, x, targetUrl)
+	return getJson[*models.LatestVersion](ctx, x, targetUrl)
 }
 
 // TODO
@@ -66,16 +66,16 @@ func (x *Repository) GetGemLatestVersion(ctx context.Context, gemName string) (*
 // Downloads 获取这个仓库中的包总共被下载了多少次
 // GET - /api/v1/downloads.(json|yaml)
 // Returns an object containing the total number of downloads on RubyGems.
-func (x *Repository) Downloads(ctx context.Context) (*model.RepositoryDownloadCount, error) {
+func (x *Repository) Downloads(ctx context.Context) (*models.RepositoryDownloadCount, error) {
 	targetUrl := fmt.Sprintf("%s/api/v1/downloads.json", x.options.ServerURL)
-	return getJson[*model.RepositoryDownloadCount](ctx, x, targetUrl)
+	return getJson[*models.RepositoryDownloadCount](ctx, x, targetUrl)
 }
 
 // VersionDownloads 获取给定的包的给定版本总共被下载了多少次
 // GET - /api/v1/downloads/[GEM NAME]-[GEM VERSION].(json|yaml)
-func (x *Repository) VersionDownloads(ctx context.Context, gemName, gemVersion string) (*model.VersionDownloadCount, error) {
+func (x *Repository) VersionDownloads(ctx context.Context, gemName, gemVersion string) (*models.VersionDownloadCount, error) {
 	targetUrl := fmt.Sprintf("%s/api/v1/downloads/%s-%s.json", x.options.ServerURL, gemName, gemVersion)
-	return getJson[*model.VersionDownloadCount](ctx, x, targetUrl)
+	return getJson[*models.VersionDownloadCount](ctx, x, targetUrl)
 }
 
 //// GET - /api/v1/dependencies?gems=[COMMA DELIMITED GEM NAMES]
@@ -90,9 +90,9 @@ func (x *Repository) VersionDownloads(ctx context.Context, gemName, gemVersion s
 
 // LatestGems 获取仓库上最新发布的gem包
 // GET - /api/v1/activity/latest.json
-func (x *Repository) LatestGems(ctx context.Context) ([]*model.PackageInformation, error) {
+func (x *Repository) LatestGems(ctx context.Context) ([]*models.PackageInformation, error) {
 	targetUrl := fmt.Sprintf("%s/api/v1/activity/latest.json", x.options.ServerURL)
-	return getJson[[]*model.PackageInformation](ctx, x, targetUrl)
+	return getJson[[]*models.PackageInformation](ctx, x, targetUrl)
 }
 
 //// https://rubygems.org/api/v1/gems/[GEM NAME]/reverse_dependencies.json
