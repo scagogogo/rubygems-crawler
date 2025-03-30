@@ -27,9 +27,64 @@ func NewMockRepo() *MockRepo {
 	}
 }
 
+// 实现Repository接口的必要方法
 func (m *MockRepo) GetPackage(ctx context.Context, gemName string) (*models.PackageInformation, error) {
 	m.calledTimes++
 	return m.testPkg, nil
+}
+
+// 为了满足Repository接口，需要实现的其他方法
+func (m *MockRepo) Search(ctx context.Context, query string, page int) ([]*models.PackageInformation, error) {
+	return nil, nil
+}
+
+func (m *MockRepo) GetGemVersions(ctx context.Context, gemName string) ([]*models.Version, error) {
+	return nil, nil
+}
+
+func (m *MockRepo) GetGemLatestVersion(ctx context.Context, gemName string) (*models.LatestVersion, error) {
+	return nil, nil
+}
+
+func (m *MockRepo) GetTimeFrameVersions(ctx context.Context, from, to time.Time) ([]*models.Version, error) {
+	return nil, nil
+}
+
+func (m *MockRepo) Downloads(ctx context.Context) (*models.RepositoryDownloadCount, error) {
+	return nil, nil
+}
+
+func (m *MockRepo) VersionDownloads(ctx context.Context, gemName, gemVersion string) (*models.VersionDownloadCount, error) {
+	return nil, nil
+}
+
+func (m *MockRepo) GetDependencies(ctx context.Context, gemsNames ...string) ([]*models.DependencyInfo, error) {
+	return nil, nil
+}
+
+func (m *MockRepo) LatestGems(ctx context.Context) ([]*models.PackageInformation, error) {
+	return nil, nil
+}
+
+func (m *MockRepo) GetReverseDependencies(ctx context.Context, gemName string) ([]string, error) {
+	return nil, nil
+}
+
+// 实现批量操作方法
+func (m *MockRepo) BulkGetPackages(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[*models.PackageInformation] {
+	return nil
+}
+
+func (m *MockRepo) BulkGetVersions(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[[]*models.Version] {
+	return nil
+}
+
+func (m *MockRepo) BulkGetDependencies(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[[]*models.DependencyInfo] {
+	return nil
+}
+
+func (m *MockRepo) BulkGetReverseDependencies(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[[]string] {
+	return nil
 }
 
 func TestCachedRepository(t *testing.T) {
@@ -66,25 +121,11 @@ func TestCachedRepository(t *testing.T) {
 
 	// 创建新的mock和缓存仓库
 	mockRepo2 := NewMockRepo()
-	cacheRepo := NewCachedRepository(&Repository{}, 10*time.Minute, memCache)
+	// 使用我们的Mock作为底层仓库
+	cacheRepo := NewCachedRepository(mockRepo2, 10*time.Minute, memCache)
 
-	// 创建一个自定义的GetPackage函数，使用我们的mock
-	getPackageWithMock := func(ctx context.Context, gemName string) (*models.PackageInformation, error) {
-		// 使用我们的mock而不是真实的API调用
-		pkg, err := mockRepo2.GetPackage(ctx, gemName)
-		if err != nil {
-			return nil, err
-		}
-
-		// 手动设置缓存
-		cacheKey := "package:" + gemName
-		cacheRepo.cache.SetWithExpiration(cacheKey, pkg, cacheRepo.expiration)
-
-		return pkg, nil
-	}
-
-	// 首次调用，通过mock获取数据并缓存
-	pkg, err := getPackageWithMock(ctx, "test-gem")
+	// 首次调用，应该会调用底层仓库
+	pkg, err := cacheRepo.GetPackage(ctx, "test-gem")
 	assert.NoError(t, err)
 	assert.Equal(t, "test-gem", pkg.Name)
 	assert.Equal(t, 1, mockRepo2.calledTimes)

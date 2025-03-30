@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"strconv"
 	"strings"
 	"time"
 
@@ -32,16 +33,16 @@ type CachedRepository struct {
 //   - repo: 底层仓库实现
 //   - ttl: 默认缓存过期时间，所有缓存项的生存时间
 //   - cache: 缓存实现，如果为nil，将创建一个新的内存缓存
-func NewCachedRepository(repo Repository, ttl time.Duration, cache cache.Cache) *CachedRepository {
-	if cache == nil {
+func NewCachedRepository(repo Repository, ttl time.Duration, cacheImpl cache.Cache) *CachedRepository {
+	if cacheImpl == nil {
 		// 如果未提供缓存，创建一个内存缓存，默认清理间隔为缓存时间的两倍
-		cache = cache.NewMemoryCache(ttl, ttl*2)
+		cacheImpl = cache.NewMemoryCache(ttl, ttl*2)
 	}
 
 	return &CachedRepository{
 		repo:          repo,
 		defaultTTL:    ttl,
-		cache:         cache,
+		cache:         cacheImpl,
 		stopCleanupCh: make(chan struct{}),
 	}
 }
@@ -72,7 +73,7 @@ func (c *CachedRepository) GetPackage(ctx context.Context, gemName string) (*mod
 // Search 通过缓存执行搜索操作
 // 由于搜索结果可能随时间变化，搜索结果的缓存时间较短
 func (c *CachedRepository) Search(ctx context.Context, query string, page int) ([]*models.PackageInformation, error) {
-	cacheKey := "search:" + query + ":" + string(page)
+	cacheKey := "search:" + query + ":" + strconv.Itoa(page)
 
 	// 尝试从缓存获取
 	if cachedValue, ok := c.cache.Get(cacheKey); ok {
@@ -285,8 +286,28 @@ func (c *CachedRepository) ClearCache() {
 	c.cache.Clear()
 }
 
-// GetCacheStats 获取当前缓存统计信息
+// GetCacheStats 获取缓存统计信息
 // 返回当前缓存中的项目数量
 func (c *CachedRepository) GetCacheStats() int {
-	return c.cache.ItemCount()
+	return c.cache.Count()
+}
+
+// BulkGetPackages implements the Repository interface
+func (c *CachedRepository) BulkGetPackages(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[*models.PackageInformation] {
+	return c.repo.BulkGetPackages(ctx, gemNames, options)
+}
+
+// BulkGetVersions implements the Repository interface
+func (c *CachedRepository) BulkGetVersions(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[[]*models.Version] {
+	return c.repo.BulkGetVersions(ctx, gemNames, options)
+}
+
+// BulkGetDependencies implements the Repository interface
+func (c *CachedRepository) BulkGetDependencies(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[[]*models.DependencyInfo] {
+	return c.repo.BulkGetDependencies(ctx, gemNames, options)
+}
+
+// BulkGetReverseDependencies implements the Repository interface
+func (c *CachedRepository) BulkGetReverseDependencies(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[[]string] {
+	return c.repo.BulkGetReverseDependencies(ctx, gemNames, options)
 }

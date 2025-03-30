@@ -13,8 +13,11 @@ func main() {
 	// 创建一个基础仓库
 	baseRepo := repository.NewRepository()
 
+	// 创建一个内存缓存
+	memCache := cache.NewMemoryCache(5*time.Minute, 15*time.Minute)
+
 	// 创建一个带缓存的仓库，缓存时间为5分钟
-	cachedRepo := repository.NewCachedRepository(baseRepo, 5*time.Minute)
+	cachedRepo := repository.NewCachedRepository(baseRepo, 5*time.Minute, memCache)
 
 	// 创建一个上下文
 	ctx := context.Background()

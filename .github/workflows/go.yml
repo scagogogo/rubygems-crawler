@@ -25,10 +25,10 @@ jobs:
       run: go mod download
 
     - name: Run Tests
-      run: go test -v ./...
+      run: go test -short -v ./...
 
     - name: Run Tests with Race Detector
-      run: go test -race -v ./...
+      run: go test -short -race -v ./...
       
   lint:
     name: Run Linter
@@ -44,7 +44,7 @@ jobs:
         check-latest: true
 
     - name: Install golangci-lint
-      run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
 
     - name: Run golangci-lint
       run: golangci-lint run 

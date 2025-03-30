@@ -64,6 +64,22 @@ type Repository interface {
 	// GetReverseDependencies 获取依赖于指定gem包的所有包
 	// GET - /api/v1/gems/[GEM NAME]/reverse_dependencies.json
 	GetReverseDependencies(ctx context.Context, gemName string) ([]string, error)
+
+	// BulkGetPackages 批量获取多个包的信息
+	// 并发执行GetPackage请求，提高大规模数据获取效率
+	BulkGetPackages(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[*models.PackageInformation]
+
+	// BulkGetVersions 批量获取多个包的版本信息
+	// 并发执行GetGemVersions请求，提高大规模数据获取效率
+	BulkGetVersions(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[[]*models.Version]
+
+	// BulkGetDependencies 批量获取多个包的依赖信息
+	// 并发执行GetDependencies请求，提高大规模数据获取效率
+	BulkGetDependencies(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[[]*models.DependencyInfo]
+
+	// BulkGetReverseDependencies 批量获取多个包的反向依赖信息
+	// 并发执行GetReverseDependencies请求，提高大规模数据获取效率
+	BulkGetReverseDependencies(ctx context.Context, gemNames []string, options *BulkOptions) []*BulkResult[[]string]
 }
 
 type RepositoryImpl struct {

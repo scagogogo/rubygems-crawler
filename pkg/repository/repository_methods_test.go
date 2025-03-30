@@ -10,6 +10,11 @@ import (
 
 // 测试获取时间段内的版本
 func TestRepository_GetTimeFrameVersions(t *testing.T) {
+	// Skip the test if running in short mode (CI environments)
+	if testing.Short() {
+		t.Skip("Skipping API test in short mode")
+	}
+
 	// 创建上下文
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -41,6 +46,11 @@ func TestRepository_GetTimeFrameVersions(t *testing.T) {
 
 // 测试获取包的依赖
 func TestRepository_GetDependencies(t *testing.T) {
+	// Skip the test if running in short mode (CI environments)
+	if testing.Short() {
+		t.Skip("Skipping API test in short mode")
+	}
+
 	// 创建上下文
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -87,6 +97,11 @@ func TestRepository_GetDependencies(t *testing.T) {
 
 // 测试获取包的反向依赖
 func TestRepository_GetReverseDependencies(t *testing.T) {
+	// Skip the test if running in short mode (CI environments)
+	if testing.Short() {
+		t.Skip("Skipping API test in short mode")
+	}
+
 	// 创建上下文
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -134,12 +149,17 @@ func TestRepository_GetReverseDependencies(t *testing.T) {
 
 // 测试使用不同的镜像源
 func TestDifferentMirrors(t *testing.T) {
+	// Skip the test if running in short mode (CI environments)
+	if testing.Short() {
+		t.Skip("Skipping mirror tests in short mode")
+	}
+
 	// 创建上下文
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	// 创建不同镜像源的仓库
-	repos := map[string]*Repository{
+	repos := map[string]Repository{
 		"默认":        NewRepository(),
 		"RubyChina": NewRubyChinaRepository(),
 		"TsingHua":  NewTSingHuaRepository(),
@@ -153,7 +173,12 @@ func TestDifferentMirrors(t *testing.T) {
 			pkg, err := repo.GetPackage(ctx, "rails")
 			assert.NoError(t, err, "%s: 获取包信息失败", name)
 			assert.NotNil(t, pkg, "%s: 包信息为nil", name)
-			assert.Equal(t, "rails", pkg.Name, "%s: 包名不匹配", name)
+			if pkg != nil {
+				assert.Equal(t, "rails", pkg.Name, "%s: 包名不匹配", name)
+			} else {
+				// Skip further assertions if pkg is nil
+				t.SkipNow()
+			}
 		})
 	}
 }
@@ -183,7 +208,9 @@ func TestProxySetting(t *testing.T) {
 	pkg, err := repo.GetPackage(ctx, "rails")
 	assert.NoError(t, err, "通过代理获取包信息失败")
 	assert.NotNil(t, pkg, "包信息为nil")
-	assert.Equal(t, "rails", pkg.Name, "包名不匹配")
+	if pkg != nil {
+		assert.Equal(t, "rails", pkg.Name, "包名不匹配")
+	}
 }
 
 // 测试Token设置 (这个测试需要有效的Token，不在CI环境中运行)
@@ -211,5 +238,7 @@ func TestTokenSetting(t *testing.T) {
 	pkg, err := repo.GetPackage(ctx, "rails")
 	assert.NoError(t, err, "使用Token获取包信息失败")
 	assert.NotNil(t, pkg, "包信息为nil")
-	assert.Equal(t, "rails", pkg.Name, "包名不匹配")
+	if pkg != nil {
+		assert.Equal(t, "rails", pkg.Name, "包名不匹配")
+	}
 }

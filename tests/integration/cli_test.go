@@ -123,6 +123,9 @@ func TestCLI(t *testing.T) {
 
 	// 测试清理
 	defer func() {
-		exec.Command("rm", "-f", "rubygems-cli").Run()
+		err := exec.Command("rm", "-f", "rubygems-cli").Run()
+		if err != nil {
+			t.Logf("清理文件失败: %v", err)
+		}
 	}()
 }
